@@ -20,7 +20,7 @@ func main() {
 	slog.SetDefault(httpserver.DefaultLoggerProduction)
 	var (
 		mode     = flag.String("mode", "production", "Server mode (default: development) [development|production]")
-		port     = flag.Int("port", 3000, "HTTP server port")
+		port     = flag.Int("port", 80, "HTTP server port")
 		serveDir = flag.String("root", "/var/www/html", "which directory to serve")
 	)
 	flag.Parse()

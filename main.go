@@ -4,10 +4,16 @@ import (
 	"flag"
 	"fmt"
 	"log/slog"
+	"net/http"
 
 	"github.com/NYTimes/gziphandler"
 	"github.com/banansys/httpserver"
 	"github.com/rs/cors"
+)
+
+const (
+	HealthCheckPath = "/_health"
+	IndexFile       = "index.html"
 )
 
 func main() {
@@ -44,7 +50,10 @@ func setLoggerAndServerMode(modeFlag string) httpserver.Mode {
 }
 
 func setupServer(serverMode httpserver.Mode, rootDir, listenAddr string) *httpserver.Server {
-	mux := spaHandler(rootDir)
+	mux := http.NewServeMux()
+
+	mux.Handle(HealthCheckPath, healthcheckHandler(rootDir))
+	mux.Handle("/", spaHandler(rootDir))
 	// middlewares ..
 	muxWithMiddlewares := requestLogging(slog.Default())(mux)
 	muxWithMiddlewares = cors.Default().Handler(muxWithMiddlewares)

@@ -23,13 +23,15 @@ func requestLogging(logger *slog.Logger) func(http.Handler) http.Handler {
 			statusWriter := &statusRecorder{w, http.StatusOK}
 			next.ServeHTTP(statusWriter, r)
 
-			logger.InfoContext(r.Context(),
-				fmt.Sprintf("%d %s - %s", statusWriter.statusCode, http.StatusText(statusWriter.statusCode), r.URL.Path),
-				"status", statusWriter.statusCode,
-				"method", r.Method,
-				"path", r.URL.Path,
-				"remote_addr", r.RemoteAddr,
-				"user_agent", r.UserAgent())
+			if r.URL.Path != HealthCheckPath {
+				logger.InfoContext(r.Context(),
+					fmt.Sprintf("%d %s - %s", statusWriter.statusCode, http.StatusText(statusWriter.statusCode), r.URL.Path),
+					"status", statusWriter.statusCode,
+					"method", r.Method,
+					"path", r.URL.Path,
+					"remote_addr", r.RemoteAddr,
+					"user_agent", r.UserAgent())
+			}
 		})
 	}
 }

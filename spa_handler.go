@@ -13,7 +13,7 @@ func spaHandler(staticDir string) http.HandlerFunc {
 		// Check if the path is a directory
 		fullPath := filepath.Join(staticDir, path)
 		if isDirectory(fullPath) {
-			dirIndexPath := filepath.Join(fullPath, "index.html")
+			dirIndexPath := filepath.Join(fullPath, IndexFile)
 			if fileExists(dirIndexPath) {
 				// Serve index.html inside the directory if it exists
 				http.ServeFile(w, r, dirIndexPath)
@@ -35,7 +35,7 @@ func spaHandler(staticDir string) http.HandlerFunc {
 		}
 
 		// Serve the root index.html for all other cases
-		http.ServeFile(w, r, filepath.Join(staticDir, "index.html"))
+		http.ServeFile(w, r, filepath.Join(staticDir, IndexFile))
 	}
 }
 

@@ -33,12 +33,11 @@ func main() {
 
 	serverMode := setLoggerAndServerMode(*mode)
 
-	curDir := Must(os.Getwd())
 	serveDir := ""
-	if len(os.Args) > 1 {
-		serveDir = os.Args[1]
+	if len(flag.Args()) == 1 {
+		serveDir = flag.Args()[0]
 	} else {
-		serveDir = curDir
+		serveDir = Must(os.Getwd())
 	}
 
 	serveDir = ResolvePath(serveDir)

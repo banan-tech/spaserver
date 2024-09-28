@@ -5,6 +5,10 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"os"
+	"os/user"
+	"path/filepath"
+	"strings"
 
 	"github.com/NYTimes/gziphandler"
 	"github.com/banansys/httpserver"
@@ -17,20 +21,31 @@ const (
 )
 
 func main() {
+	defer handlePanic()
+
 	slog.SetDefault(httpserver.DefaultLoggerProduction)
 	var (
-		mode     = flag.String("mode", "production", "Server mode (default: development) [development|production]")
-		port     = flag.Int("port", 80, "HTTP server port")
-		serveDir = flag.String("root", "/var/www/html", "which directory to serve")
+		mode = flag.String("mode", "production", "Server mode (default: development) [development|production]")
+		port = flag.Int("port", 3000, "HTTP server port")
 	)
 	flag.Parse()
 	addr := fmt.Sprintf(":%d", *port)
 
 	serverMode := setLoggerAndServerMode(*mode)
 
-	server := setupServer(serverMode, *serveDir, addr)
+	curDir := Must(os.Getwd())
+	serveDir := ""
+	if len(os.Args) > 1 {
+		serveDir = os.Args[1]
+	} else {
+		serveDir = curDir
+	}
 
-	slog.Info("", "www-root", *serveDir)
+	serveDir = ResolvePath(serveDir)
+
+	server := setupServer(serverMode, serveDir, addr)
+
+	slog.Info("", "www-root", serveDir)
 
 	if err := server.Run(); err != nil {
 		slog.Error("server error", "err", err)
@@ -64,4 +79,37 @@ func setupServer(serverMode httpserver.Mode, rootDir, listenAddr string) *httpse
 		httpserver.WithLogger(slog.Default()),
 		httpserver.ListenOn(listenAddr),
 	)
+}
+
+func handlePanic() {
+	if err := recover(); err != nil {
+		slog.Error("panic", "err", err)
+		os.Exit(1)
+	}
+}
+
+func Must[T any](res T, err error) T {
+	if err != nil {
+		panic(err)
+	}
+
+	return res
+}
+
+// ResolvePath resolves a path (absolute, relative, or home path with ~) to an absolute path,
+// and also resolves any symbolic links along the way.
+func ResolvePath(inputPath string) string {
+	// Handle home directory path starting with `~`
+	if strings.HasPrefix(inputPath, "~") {
+		// Replace ~ with the user's home directory
+		inputPath = filepath.Join(Must(user.Current()).HomeDir, inputPath[1:])
+	}
+
+	// Convert relative path to absolute path
+	absPath := Must(filepath.Abs(inputPath))
+
+	// Resolve any symbolic links in the path
+	resolvedPath := Must(filepath.EvalSymlinks(absPath))
+
+	return resolvedPath
 }

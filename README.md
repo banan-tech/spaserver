@@ -5,7 +5,7 @@
 - Golang is required, minimum version: `1.23`
 
 ```sh
-go install github.com/banansys/spaserver@latest
+go install github.com/banan-tech/spaserver@latest
 ```
 
 ## Running

@@ -1,4 +1,4 @@
-module github.com/banansys/spaserver
+module github.com/banan-tech/spaserver
 
 go 1.23.1
 

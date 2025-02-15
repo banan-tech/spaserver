@@ -10,7 +10,7 @@ COPY --from=builder /opt/app/spaserver /usr/bin/spaserver
 
 EXPOSE 80
 
-ENTRYPOINT [ "/usr/bin/spaserver" ]
+ENTRYPOINT [ "/usr/bin/spaserver", "-port", "80" ]
 
 HEALTHCHECK --interval=10s --timeout=1s --start-period=5s --retries=3 \
     CMD [ "wget", "-qO", "-", "http://localhost/_health" ]

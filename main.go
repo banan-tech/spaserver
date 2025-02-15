@@ -70,7 +70,7 @@ func setupServer(serverMode httpserver.Mode, rootDir, listenAddr string) *httpse
 	mux.Handle("/", spaHandler(rootDir))
 	// middlewares ..
 	muxWithMiddlewares := requestLogging(slog.Default())(mux)
-	muxWithMiddlewares = cors.Default().Handler(muxWithMiddlewares)
+	muxWithMiddlewares = cors.AllowAll().Handler(muxWithMiddlewares)
 	muxWithMiddlewares = gziphandler.GzipHandler(muxWithMiddlewares)
 
 	return httpserver.New(muxWithMiddlewares,
